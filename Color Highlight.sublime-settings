@@ -51,11 +51,12 @@
         /*
             XXX_values - Highlights rgb/rgba, hsv/hsva, hsl/hsla, hwb, lab, lch colors
         */
-        "rgb_values": true,
+        "rgb_values": false,
         "hsv_values": true,
         "hsl_values": true,
         "hwb_values": true,
         "lab_values": true,
-        "lch_values": true
+        "lch_values": true,
+        "argb_values": true,
     }
 }

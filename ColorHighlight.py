@@ -41,6 +41,14 @@ VERSION = "1.2.2"
 # \033[31m
 # \033[38;5;22m
 # \033[38;2;0;0;255m
+# argb(1, 0, 255, 0)
+# argb(.2, 0, 0, 255)
+# argb(0.5, 255, 0, 0)
+# argb(100%, white)
+
+# #FF000011 -- RGBA
+# #FFFF1122 -- ARGB
+
 
 regex_cache = {}
 re_cache = {}
@@ -52,6 +60,7 @@ def regex_factory(
     hex_values,
     xterm_color_values,
     rgb_values,
+    argb_values,
     hsv_values,
     hsl_values,
     hwb_values,
@@ -64,6 +73,7 @@ def regex_factory(
         hex_values,
         xterm_color_values,
         rgb_values,
+        argb_values,
         hsv_values,
         hsl_values,
         hwb_values,
@@ -76,6 +86,8 @@ def regex_factory(
         function_colors = []
         if rgb_values:
             function_colors.extend([r'rgb', r'rgba'])
+        if argb_values:
+            function_colors.extend([r'argb'])
         if hsv_values:
             function_colors.extend([r'hsv', r'hsva'])
         if hsl_values:
@@ -136,6 +148,7 @@ def re_factory(
     hex_values,
     xterm_color_values,
     rgb_values,
+    argb_values,
     hsv_values,
     hsl_values,
     hwb_values,
@@ -148,6 +161,7 @@ def re_factory(
         hex_values,
         xterm_color_values,
         rgb_values,
+        argb_values,
         hsv_values,
         hsl_values,
         hwb_values,
@@ -163,6 +177,7 @@ def re_factory(
             hex_values=hex_values,
             xterm_color_values=xterm_color_values,
             rgb_values=rgb_values,
+            argb_values=argb_values,
             hsv_values=hsv_values,
             hsl_values=hsl_values,
             hwb_values=hwb_values,
@@ -604,6 +619,9 @@ def highlight_colors(view, selection=False, **kwargs):
     hwb_values = bool(settings.get('hwb_values', True))
     lab_values = bool(settings.get('lab_values', True))
     lch_values = bool(settings.get('lch_values', True))
+    argb_values = bool(settings.get('argb_values', True))
+    if argb_values:
+        rgb_values = False
 
     if len(view.sel()) > 100:
         selection = False
@@ -624,6 +642,7 @@ def highlight_colors(view, selection=False, **kwargs):
             hex_values=hex_values,
             xterm_color_values=xterm_color_values,
             rgb_values=rgb_values,
+            argb_values=argb_values,
             hsv_values=hsv_values,
             hsl_values=hsl_values,
             hwb_values=hwb_values,
@@ -661,6 +680,7 @@ def highlight_colors(view, selection=False, **kwargs):
             hex_values=hex_values,
             xterm_color_values=xterm_color_values,
             rgb_values=rgb_values,
+            argb_values=argb_values,
             hsv_values=hsv_values,
             hsl_values=hsl_values,
             hwb_values=hwb_values,
@@ -817,27 +837,54 @@ def highlight_colors(view, selection=False, **kwargs):
                         col0 = '#' + col0[2:]
                     else:
                         col0 = all_names_to_hex.get(col0.lower(), col0.upper())
-                    if len(col0) == 4:
-                        col0 = '#' + col0[1] * 2 + col0[2] * 2 + col0[3] * 2 + 'FF'
-                    elif len(col0) == 7:
-                        col0 += 'FF'
+                    if argb_values:
+                        #FFFF1122 -- ARGB
+                        #3394deff -- ARGB
+                        #FFf9a2b3 -- ARGB
+                        if len(col0) == 4:
+                            col0 = '#' + col0[1] * 2 + col0[2] * 2 + col0[3] * 2 + 'FF'
+                        elif len(col0) == 7:
+                            col0 += 'FF'
+                        col0 = '#' + col0[3:] + col0[1:3]
+                    else:
+                        #FF001177 -- RGBA
+                        if len(col0) == 4:
+                            col0 = '#' + col0[1] * 2 + col0[2] * 2 + col0[3] * 2 + 'FF'
+                        elif len(col0) == 7:
+                            col0 += 'FF'
                     col = col0
             elif col[1] and col[2]:
-                # In the form of rgb(255, 255, 255) or rgba(255, 255, 255, 1.0):
-                r = int(col[0])
-                g = int(col[1])
-                b = int(col[2])
-                if (r < 0 or r > 255) or (g < 0 or g > 255) or (b < 0 or b > 255):
-                    raise ValueError("rgb out of range")
-                if len(col) == 4:
-                    if col[3].endswith('%'):
-                        alpha = float(col[3][:-1])
+                if argb_values:
+                    # In the form of argb(0.5, 255, 0, 0):
+                    if col[0].endswith('%'):
+                        alpha = float(col[0][:-1])
                     else:
-                        alpha = float(col[3]) * 100.0
+                        alpha = float(col[0]) * 100.0
                     if alpha < 0 or alpha > 100:
                         raise ValueError("alpha out of range")
+                    else:
+                        alpha = 100.0
+                    r = int(col[1])
+                    g = int(col[2])
+                    b = int(col[3])
+                    if (r < 0 or r > 255) or (g < 0 or g > 255) or (b < 0 or b > 255):
+                        raise ValueError("rgb out of range")
                 else:
-                    alpha = 100.0
+                    # In the form of rgb(255, 255, 255) or rgba(255, 255, 255, 1.0):
+                    r = int(col[0])
+                    g = int(col[1])
+                    b = int(col[2])
+                    if (r < 0 or r > 255) or (g < 0 or g > 255) or (b < 0 or b > 255):
+                        raise ValueError("rgb out of range")
+                    if len(col) == 4:
+                        if col[3].endswith('%'):
+                            alpha = float(col[3][:-1])
+                        else:
+                            alpha = float(col[3]) * 100.0
+                        if alpha < 0 or alpha > 100:
+                            raise ValueError("alpha out of range")
+                    else:
+                        alpha = 100.0
                 col = tohex(r, g, b, alpha)
             else:
                 # In the form of rgba(white, 20%) or rgba(#FFFFFF, 0.4):

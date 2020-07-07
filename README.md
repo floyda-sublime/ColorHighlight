@@ -1,7 +1,14 @@
-# 🎨 Color Highlight
+# 🎨 Color Highlight(Support ARGB/RGBA)
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/Kronuz/25)
 [![Package Control](https://img.shields.io/packagecontrol/dt/Color%20Highlight.svg)](https://packagecontrol.io/packages/Color%20Highlight)
+
+
+> ## Support ARGB/RGBA
+> - open `Color Highlight.sublime-settings` or create local settings file on `Packages/Users`.
+> - modify `argb_values` to `true`.
+> - only one of `rgb_values` and `argb_values` is true.
+
 
 Show color codes (like "#ffffff", 0xffffff "rgb(255, 255, 255)", "white",
 hsl(0, 0%, 100%), etc.) with their real color as the background and/or gutter icons.
