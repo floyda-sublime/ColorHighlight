@@ -838,13 +838,12 @@ def highlight_colors(view, selection=False, **kwargs):
                     else:
                         col0 = all_names_to_hex.get(col0.lower(), col0.upper())
                     if argb_values:
-                        #FFFF1122 -- ARGB
-                        #3394deff -- ARGB
+                        #f9a2b3 -- ARGB
                         #FFf9a2b3 -- ARGB
                         if len(col0) == 4:
                             col0 = '#' + col0[1] * 2 + col0[2] * 2 + col0[3] * 2 + 'FF'
                         elif len(col0) == 7:
-                            col0 += 'FF'
+                            col0 = '#FF' + col0[1:]
                         col0 = '#' + col0[3:] + col0[1:3]
                     else:
                         #FF001177 -- RGBA
